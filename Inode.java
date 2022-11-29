@@ -1,4 +1,5 @@
 public class Inode {
+	//test edit
 	public final static int iNodeSize = 32;  // fixed to 32 bytes
     public final static int directSize = 11; // # direct pointers
 

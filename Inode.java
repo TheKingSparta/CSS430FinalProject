@@ -57,5 +57,8 @@ public class Inode {
 	// saving this inode to disk
 	void toDisk( short iNumber ) {     
 		// you implement
+		//check corresponding inode on disk
+		//if another thread updated it: read it from the disk and write the contents back
+		//
 	}
 }

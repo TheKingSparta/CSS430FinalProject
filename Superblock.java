@@ -1,13 +1,23 @@
+/**
+	Worked on by: Renee
+	Purpose: The superblock the first block (BLOCK 0) in the disk.
+	The superblock stores information about the rest of the disk.
+	NO USER THREADS CAN ACCESS SUPER BLOCK
 
+	Satus: incomplete
+ */
 public class Superblock {
     private final int defaultInodeBlocks = 64;
-    public int totalBlocks;
-    public int inodeBlocks;
-    public int freeList;
+    public int totalBlocks; //number of disk blocks
+    public int inodeBlocks; //number of inodes
+    public int freeList; //block number of the free-list's head
 	
 	// you implement
 	public SuperBlock( int diskSize ) {
-		// read the superblock from disk	
+		// read the superblock from disk
+		totalBlocks = Disk.diskSize;
+		inodeBlocks = Disk.inodeBlocks;
+		freelist = Disk.freeList;
 	}
 	
 	//  helper function

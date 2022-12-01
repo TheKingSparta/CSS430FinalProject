@@ -6,7 +6,7 @@
 
 	Satus: incomplete
  */
-public class Superblock {
+public class SuperBlock {
     private final int defaultInodeBlocks = 64;
     public int totalBlocks; //number of disk blocks
     public int inodeBlocks; //number of inodes

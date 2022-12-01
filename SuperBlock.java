@@ -38,7 +38,6 @@ public class SuperBlock {
 	// you implement
 	 void format( int files ) {
 		// initialize the superblock
-		superBlock = new byte[Disk.blockSize];
 	 }
 	
 	// you implement

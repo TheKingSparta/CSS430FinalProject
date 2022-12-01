@@ -2,6 +2,7 @@
 	Worked on by: Renee
 	Purpose: The superblock the first block (BLOCK 0) in the disk.
 	The superblock stores information about the rest of the disk.
+	"For accessing this block, you should call SysLib.rawread( 0, data ) where data is a 512-byte array."
 	NO USER THREADS CAN ACCESS SUPER BLOCK
 
 	Satus: incomplete
@@ -15,9 +16,11 @@ public class SuperBlock {
 	// you implement
 	public SuperBlock( int diskSize ) {
 		// read the superblock from disk
-		totalBlocks = Disk.diskSize;
-		inodeBlocks = Disk.inodeBlocks;
-		freelist = Disk.freeList;
+		byte[] data = new byte[512];
+		SysLib.rawread(0, data);
+		SysLib.bytes2int();//image this should be like sync function but not sure what all the parameters are for it
+		SysLib.bytes2int();
+		SysLib.bytes2int();
 	}
 	
 	//  helper function
@@ -38,7 +41,6 @@ public class SuperBlock {
 	// you implement
 	 void format( int files ) {
 		// initialize the superblock
-		superBlock = new byte[Disk.blockSize];
 	 }
 	
 	// you implement

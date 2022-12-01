@@ -18,9 +18,10 @@ public class SuperBlock {
 		// read the superblock from disk
 		byte[] data = new byte[512];
 		SysLib.rawread(0, data);
-		SysLib.bytes2int();//image this should be like sync function but not sure what all the parameters are for it
-		SysLib.bytes2int();
-		SysLib.bytes2int();
+		SysLib.bytes2int(data, totalBlocks, 0);//image this should be like sync function but not sure what all the parameters are for it
+		SysLib.bytes2int(data, inodeBlocks, 4);
+		SysLib.bytes2int(data, freeList, 8);
+		SysLib.cerr("Suberblock intialized");
 	}
 	
 	//  helper function

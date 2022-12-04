@@ -13,14 +13,27 @@ public class FileTable {
 
     //TODO: you implement
     public synchronized FileTableEntry falloc(String fname, String mode) {
-        // allocate a new file (structure) table entry for this file name
-        FileTableEntry target = new FileTableEntry();
-        table.add(target);
         // allocate/retrieve and register the corresponding inode using dir
+        short iNodeNumber = dir.namei(fname);
+        if(iNodeNumber == -1) { //If the file doesn't exist, create it
+            iNodeNumber = dir.ialloc(fname);
+        }
+
+        Inode node = new Inode(iNodeNumber);
+
+        // allocate a new file (structure) table entry for this file name
+        FileTableEntry newEntry = new FileTableEntry(node, iNodeNumber, mode);
+        table.add(newEntry);
+
         // increment this inode's count
+        newEntry.count++;
+
         // immediately write back this inode to the disk
+        //TODO: Is this right?
+        newEntry.inode.toDisk(iNodeNumber);
+
         // return a reference to this file (structure) table entry
-        return target;
+        return newEntry;
     }
 
     public synchronized boolean ffree(FileTableEntry e) {

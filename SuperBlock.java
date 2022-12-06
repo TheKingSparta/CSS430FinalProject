@@ -11,7 +11,7 @@ public class SuperBlock {
     private final int defaultInodeBlocks = 64;
     public int totalBlocks; //number of disk blocks
     public int inodeBlocks; //number of inodes
-    public int freeList; //block number of the free-list's head
+    public int freeList; //block number of the free-list's head - points to the block number
 	
 	// you implement
 	public SuperBlock( int diskSize ) {
@@ -25,6 +25,7 @@ public class SuperBlock {
 	}
 	
 	//  helper function
+	//converts all data to byte format to be written back to the disk
 	void sync( ) {
 		byte[] superBlock = new byte[Disk.blockSize];
 		SysLib.int2bytes( totalBlocks, superBlock, 0 );
@@ -42,17 +43,21 @@ public class SuperBlock {
 	// you implement
 	 void format( int files ) {
 		// initialize the superblock
+		
 	 }
 	
 	// you implement
 	public int getFreeBlock( ) {
 		// get a new free block from the freelist
-		
+		freelist_return = freelist;
+		freelist++;
+		return freelist_return;
 	}
 	
 	// you implement
 	public boolean returnBlock( int oldBlockNumber ) {
-	// return this former block
+		// return this former block
+
 	}
 	
 }

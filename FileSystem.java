@@ -56,7 +56,7 @@ public class FileSystem {
     //TODO: open()
     FileTableEntry open( String filename, String mode ) {
         // filetable entry is allocated
-
+        return filetable.falloc(filename, mode);
     }
 
     boolean close( FileTableEntry ftEnt ) {
@@ -73,7 +73,7 @@ public class FileSystem {
 	
     //TODO: fsize()
     int fsize( FileTableEntry ftEnt ) {
-
+        return ftEnt.inode.length;
     }
 
     //TODO: read()

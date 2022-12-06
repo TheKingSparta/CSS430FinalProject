@@ -59,6 +59,5 @@ public class Inode {
 		// you implement
 		//check corresponding inode on disk
 		//if another thread updated it: read it from the disk and write the contents back
-		//
 	}
 }

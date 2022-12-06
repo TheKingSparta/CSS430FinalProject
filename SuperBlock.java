@@ -12,16 +12,24 @@ public class SuperBlock {
     public int totalBlocks; //number of disk blocks
     public int inodeBlocks; //number of inodes
     public int freeList; //block number of the free-list's head
-	
-	// you implement
+
+		// you implement
 	public SuperBlock( int diskSize ) {
 		// read the superblock from disk
 		byte[] data = new byte[512];
 		SysLib.rawread(0, data);
-		SysLib.bytes2int(data, totalBlocks, 0);//image this should be like sync function but not sure what all the parameters are for it
-		SysLib.bytes2int(data, inodeBlocks, 4);
-		SysLib.bytes2int(data, freeList, 8);
-		SysLib.cerr("Suberblock intialized");
+		totalBlocks = SysLib.bytes2int(data, 0);//image this should be like sync function but not sure what all the parameters are for it
+		inodeBlocks = SysLib.bytes2int(data, 4);
+		freeList = SysLib.bytes2int(data, 8);
+
+		if(totalBlocks == diskSize && inodeBlocks > 0 && freeList >= 2) {
+			return;
+		} else {
+			totalBlocks = diskSize;
+			format(defaultInodeBlocks);
+		}
+
+		SysLib.cerr("Superblock initialized");
 	}
 	
 	//  helper function
@@ -39,18 +47,18 @@ public class SuperBlock {
 		format( defaultInodeBlocks );
     }
 	
-	// you implement
+	//TODO: you implement
 	 void format( int files ) {
 		// initialize the superblock
 	 }
 	
-	// you implement
+	//TODO: you implement
 	public int getFreeBlock( ) {
 		// get a new free block from the freelist
 		
 	}
 	
-	// you implement
+	//TODO: you implement
 	public boolean returnBlock( int oldBlockNumber ) {
 	// return this former block
 	}

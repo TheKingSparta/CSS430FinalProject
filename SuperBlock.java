@@ -51,6 +51,9 @@ public class SuperBlock {
 	//TODO: you implement
 	 void format( int files ) {
 		// initialize the superblock
+		//intialize inodes(?)
+		//create freelist
+
 
 	 }
 	

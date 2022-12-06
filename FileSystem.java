@@ -35,6 +35,7 @@ public class FileSystem {
         superblock.sync( );
     }
 
+    //TODO: Is this right?
     boolean format( int files ) {
         // wait until all filetable entries are destructed
         while ( filetable.fempty( ) == false )
@@ -52,6 +53,7 @@ public class FileSystem {
         return true;
     }
 
+    //TODO: open()
     FileTableEntry open( String filename, String mode ) {
         // filetable entry is allocated
 
@@ -69,12 +71,12 @@ public class FileSystem {
     }
 	
 	
-
+    //TODO: fsize()
     int fsize( FileTableEntry ftEnt ) {
 
     }
 
-
+    //TODO: read()
     int read( FileTableEntry ftEnt, byte[] buffer ) {
         if ( ftEnt.mode == "w" || ftEnt.mode == "a" )
             return -1;
@@ -89,6 +91,7 @@ public class FileSystem {
         }
     }
 
+    //TODO: finish write() ?
     int write( FileTableEntry ftEnt, byte[] buffer ) {
         // at this point, ftEnt is only the one to modify the inode
         if ( ftEnt.mode == "r" )
@@ -102,6 +105,7 @@ public class FileSystem {
         }
     }
 
+    //TODO: deallocAllBlocks
     private boolean deallocAllBlocks( FileTableEntry ftEnt ) {
 
         return true;
@@ -120,6 +124,7 @@ public class FileSystem {
     private final int SEEK_CUR = 1;
     private final int SEEK_END = 2;
 
+    //TODO: seek()
     int seek( FileTableEntry ftEnt, int offset, int whence ) {
         synchronized ( ftEnt ) {
             /*

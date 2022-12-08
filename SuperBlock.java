@@ -50,11 +50,16 @@ public class SuperBlock {
 	
 	//TODO: you implement
 	 void format( int files ) {
-		// initialize the superblock
-		//intialize inodes(?)
-		//create freelist
-
-
+		//Block 0: super block
+		//Block 1: inodes 0-21
+		//Block 2: inodes 22-43
+		//Block 3: inodes 44-63
+		//Block 4: first free block
+		inodeBlocks = 3;//number of inodes????
+		freelist = 4;
+		totalBlocks = 64;
+		sync(); //write it onto the disk
+		SysLib.cerr("Superblock has been formated");
 	 }
 	
 	//TODO: you implement
@@ -68,7 +73,9 @@ public class SuperBlock {
 	//TODO: you implement
 	public boolean returnBlock( int oldBlockNumber ) {
 		// return this former block
-
+		byte[] data = new byte[512];
+		SysLib.rawread(oldBlockNumber, data);
+		
 	}
 	
 }

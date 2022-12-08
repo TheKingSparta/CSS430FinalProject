@@ -2,7 +2,7 @@
 Worked on by: Renee
 	Purpose: Each inode represents one file, creates each inode and reads/writes it to the disk
 
-	Satus: complete but not testes
+	Satus: complete but not tested
  */
 public class Inode {
 	public final static int iNodeSize = 32;  // fixed to 32 bytes

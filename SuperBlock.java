@@ -11,7 +11,7 @@ public class SuperBlock {
     private final int defaultInodeBlocks = 64;
     public int totalBlocks; //number of disk blocks
     public int inodeBlocks; //number of inodes
-    //public int freeList; //block number of the free-list's head - points to the block number
+    public int freeList; //block number of the free-list's head - points to the block number
 	private boolean[] freeList_arr;
 	//false: block is not in use
 	//true: block is in use
@@ -41,6 +41,11 @@ public class SuperBlock {
 		byte[] superBlock = new byte[Disk.blockSize];
 		SysLib.int2bytes( totalBlocks, superBlock, 0 );
 		SysLib.int2bytes( inodeBlocks, superBlock, 4 );
+
+		int offset = 4;
+		for(block : freeList_arr){
+			
+		}
 		SysLib.int2bytes( freeList, superBlock, 8 );
 		SysLib.rawwrite( 0, superBlock );
 		SysLib.cerr( "Superblock synchronized\n" );

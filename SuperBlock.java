@@ -55,9 +55,9 @@ public class SuperBlock {
 		//Block 2: inodes 22-43
 		//Block 3: inodes 44-63
 		//Block 4: first free block
-		inodeBlocks = 3;//number of inodes????
-		freelist = 4;
-		totalBlocks = 64;
+		inodeBlocks = files; //number of inodes????
+		totalBlocks = files / 16; //each block will have 16 inodes
+		freeList = totalBlocks + 1;
 		sync(); //write it onto the disk
 		SysLib.cerr("Superblock has been formated");
 	 }
@@ -65,17 +65,18 @@ public class SuperBlock {
 	//TODO: you implement
 	public int getFreeBlock( ) {
 		// get a new free block from the freelist
-		freelist_return = freelist;
-		freelist++;
-		return freelist_return;
+		freeList_return = freeList;
+		freeList++;
+		return freeList_return;
 	}
 	
 	//TODO: you implement
+	//based on how its used what it does? clear this block?
 	public boolean returnBlock( int oldBlockNumber ) {
 		// return this former block
 		byte[] data = new byte[512];
 		SysLib.rawread(oldBlockNumber, data);
-		
+
 	}
 	
 }

@@ -5,13 +5,16 @@
 	"For accessing this block, you should call SysLib.rawread( 0, data ) where data is a 512-byte array."
 	NO USER THREADS CAN ACCESS SUPER BLOCK
 
-	Satus: incomplete
+	Satus: complete; freelist may cause issues
  */
 public class SuperBlock {
     private final int defaultInodeBlocks = 64;
     public int totalBlocks; //number of disk blocks
     public int inodeBlocks; //number of inodes
-    public int freeList; //block number of the free-list's head - points to the block number
+    //public int freeList; //block number of the free-list's head - points to the block number
+	private boolean[] freeList_arr;
+	//false: block is not in use
+	//true: block is in use
 	
 	// you implement
 	public SuperBlock( int diskSize ) {
@@ -57,7 +60,12 @@ public class SuperBlock {
 		//Block 4: first free block
 		inodeBlocks = files; //number of inodes????
 		totalBlocks = files / 16; //each block will have 16 inodes
-		freeList = totalBlocks + 1;
+		//freeList = totalBlocks + 1;
+		freeList_arr = new boolean[totalBlocks + 1];//keep track of blocks in use
+		for(block : freeList_arr){
+			block = false;//set all blocks to not in use
+		}
+		freeList_arr[0] = true;//set super block to be in use
 		sync(); //write it onto the disk
 		SysLib.cerr("Superblock has been formated");
 	 }
@@ -65,18 +73,22 @@ public class SuperBlock {
 	//TODO: you implement
 	public int getFreeBlock( ) {
 		// get a new free block from the freelist
-		freeList_return = freeList;
-		freeList++;
-		return freeList_return;
+		for(int i = 1; i < freeList_arr.length(); i++){
+			if(freeList_arr[i] = false){
+				return i;
+			}
+		}
 	}
 	
 	//TODO: you implement
-	//based on how its used what it does? clear this block?
+	//based on how its used what it does? clear this block? add it to free list?
 	public boolean returnBlock( int oldBlockNumber ) {
 		// return this former block
-		byte[] data = new byte[512];
-		SysLib.rawread(oldBlockNumber, data);
-
+		if(oldBlockNumber != 0){
+			freeList_arr[oldBlockNumber] = false;
+			return true;
+		}
+		return false;
 	}
 	
 }

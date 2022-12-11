@@ -192,7 +192,17 @@ public class FileSystem {
                     " seekptr=" + ftEnt.seekPtr +
                     " whence=" + whence );
             */
-			
+            if(whence == SEEK_SET) {    //From the beginning
+                ftEnt.seekPtr = offset;
+            } else if (whence == SEEK_CUR) {    //From current pos
+                ftEnt.seekPtr = ftEnt.seekPtr + offset;
+            }
+            else if (whence == SEEK_END) {  //From the end
+                //Find the end of the file
+                ftEnt.seekPtr = ftEnt.inode.length + offset;
+            } else {
+                SysLib.cerr("INVALID WHENCE IN seek(): " + whence);
+            }
 		}
 
     }

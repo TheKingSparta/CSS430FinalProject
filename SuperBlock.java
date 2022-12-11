@@ -64,7 +64,7 @@ public class SuperBlock {
 		format( defaultInodeBlocks );
     }
 	
-	//TODO: you implement
+	//TODO: should blocks 1-3 be set???
 	 void format( int files ) {
 		//Block 0: super block
 		//Block 1: inodes 0-21

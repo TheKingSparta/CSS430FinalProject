@@ -172,9 +172,25 @@ public class FileSystem {
         //write from end of file
     }
 
-    //TODO: deallocAllBlocks
+    //Set ftEnt's blocks to null
     private boolean deallocAllBlocks( FileTableEntry ftEnt ) {
+        //make buffer array length of file
+        int bufSize = ftEnt.inode.length;
+        byte[] nullArray = new byte[bufSize];
 
+        //make all elements in array null -  will be used to "dealocate" blocks
+        for(byte b : nullArray){
+            b = null;
+        }
+
+        //set seek to the beginning of the file
+        seek(ftEnt, 0, SEEK_SET);
+
+        //use write to overwrite all data blocks to null
+        if(write(ftEnt, nullArray) == -1){
+            SysLib.cerr("ERROR IN DeallocAllBlocks in FileSystem: WRITE FAILED");
+            return false;
+        }
         return true;
     }
 

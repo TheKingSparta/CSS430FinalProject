@@ -11,7 +11,7 @@ public class SuperBlock {
     private final int defaultInodeBlocks = 64;
     public int totalBlocks; //number of disk blocks
     public int inodeBlocks; //number of inodes
-    public int freeList; //block number of the free-list's head - points to the block number
+    //public int freeList; //block number of the free-list's head - points to the block number
 	private boolean[] freeList_arr;
 	//false: block is not in use
 	//true: block is in use
@@ -23,9 +23,16 @@ public class SuperBlock {
 		SysLib.rawread(0, data);
 		totalBlocks = SysLib.bytes2int(data, 0);//image this should be like sync function but not sure what all the parameters are for it
 		inodeBlocks = SysLib.bytes2int(data, 4);
-		freeList = SysLib.bytes2int(data, 8);
+		//freeList = SysLib.bytes2int(data, 8);
+		freeList_arr = new boolean[totalBlocks + 1];
+		int offset = 4;
+		for(boolean block : freeList_arr){
+			block =  data[offset + 1] != 0;
+			//superBlock[offset + 1] = (byte) (block ? 1 : 0);
+			offset++;
+		}
 
-		if(totalBlocks == diskSize && inodeBlocks > 0 && freeList >= 2) {
+		if(totalBlocks == diskSize && inodeBlocks > 0 &&  freeList_arr[0] && freeList_arr[1]) {
 			return;
 		} else {
 			totalBlocks = diskSize;
@@ -43,10 +50,11 @@ public class SuperBlock {
 		SysLib.int2bytes( inodeBlocks, superBlock, 4 );
 
 		int offset = 4;
-		for(block : freeList_arr){
-			
+		for(boolean block : freeList_arr){
+			superBlock[offset + 1] = (byte) (block ? 1 : 0);
+			offset++;
 		}
-		SysLib.int2bytes( freeList, superBlock, 8 );
+		//SysLib.int2bytes( freeList, superBlock, 8 );
 		SysLib.rawwrite( 0, superBlock );
 		SysLib.cerr( "Superblock synchronized\n" );
     }
@@ -67,7 +75,7 @@ public class SuperBlock {
 		totalBlocks = files / 16; //each block will have 16 inodes
 		//freeList = totalBlocks + 1;
 		freeList_arr = new boolean[totalBlocks + 1];//keep track of blocks in use
-		for(block : freeList_arr){
+		for(boolean block : freeList_arr){
 			block = false;//set all blocks to not in use
 		}
 		freeList_arr[0] = true;//set super block to be in use
@@ -78,11 +86,12 @@ public class SuperBlock {
 	//TODO: you implement
 	public int getFreeBlock( ) {
 		// get a new free block from the freelist
-		for(int i = 1; i < freeList_arr.length(); i++){
-			if(freeList_arr[i] = false){
+		for(int i = 1; i < freeList_arr.length; i++){
+			if(freeList_arr[i] == false){
 				return i;
 			}
 		}
+		return -1; //If there is no free block
 	}
 	
 	//TODO: you implement

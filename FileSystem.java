@@ -35,7 +35,8 @@ public class FileSystem {
         superblock.sync( );
     }
 
-    //TODO: Is this right?
+
+    //TODO: Should be done
     boolean format( int files ) {
         // wait until all filetable entries are destructed
         while ( filetable.fempty( ) == false )
@@ -53,8 +54,9 @@ public class FileSystem {
         return true;
     }
 
-    //TODO: open()
+    //TODO: Should be done
     FileTableEntry open( String filename, String mode ) {
+        //No need to check if file exists, falloc() does it
         // filetable entry is allocated
         return filetable.falloc(filename, mode);
     }
@@ -71,24 +73,69 @@ public class FileSystem {
     }
 	
 	
-    //TODO: fsize()
+    //TODO: Should be done
     int fsize( FileTableEntry ftEnt ) {
         return ftEnt.inode.length;
     }
 
     //TODO: read()
     int read( FileTableEntry ftEnt, byte[] buffer ) {
+        //Check if the mode allows the file to be read, return -1 if not
         if ( ftEnt.mode == "w" || ftEnt.mode == "a" )
             return -1;
-    
+
+
         int offset   = 0;              // buffer offset
         int left     = buffer.length;  // the remaining data of this buffer
     
         synchronized ( ftEnt ) {
 			// repeat reading until no more data  or reaching EOF
+            //Each direct is a short, a short is 2 bytes
+            /*
+            for(int i = 0; i < ftEnt.inode.direct.length && i < left / 2; i++) {
+                SysLib.short2bytes(ftEnt.inode.direct[i], buffer, offset);
+                offset += 2;
+            }
+             */
 
+            //TODO: Seek pntrs :
 
+            //TODO: Check buffer is large enough
+
+            //TODO: Check rawread() returns
+
+            byte[] blockData = new byte[512];
+            //Read all the directs
+            for(int i = 0; i < ftEnt.inode.direct.length; i++) {
+                //Get the data from the block
+                if(ftEnt.inode.direct[i] == -1) {
+                    return offset;
+                }
+                SysLib.rawread(ftEnt.inode.direct[i], blockData);
+                for(int j = 0; j < 512; j++) {
+                    buffer[offset + j] = blockData[j];
+                }
+                offset += 512;
+            }
+            //Read the indirect
+            byte[] indirectData = new byte[512];
+            SysLib.rawread(ftEnt.inode.indirect, indirectData);
+            int indirectOffset = 0;
+            for(int i = 0; i < 256; i++) {
+                //Get the data from the block
+                short nextBlock = SysLib.bytes2short(indirectData, indirectOffset);
+                indirectOffset += 2;
+                if(nextBlock == -1) {
+                    return offset;
+                }
+                SysLib.rawread(nextBlock, blockData);
+                for(int j = 0; j < 512; j++) {
+                    buffer[offset + j] = blockData[j];
+                }
+                offset += 512;
+            }
         }
+        return offset;
     }
 
     //TODO: finish write() ?

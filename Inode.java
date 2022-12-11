@@ -90,7 +90,7 @@ public class Inode {
 
 		//write inode back to disk @ iNumber
 		//put all inode attributes in data array
-		int offset = ( iNumber % 16 ) * iNodeSize; // reset offset to top of inode
+		offset = ( iNumber % 16 ) * iNodeSize; // reset offset to top of inode
 		SysLib.int2bytes( length, data, offset ); // add all data member to the data[]
 		offset += 4;
 		SysLib.short2bytes( count, data, offset );

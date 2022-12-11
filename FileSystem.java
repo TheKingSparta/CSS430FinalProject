@@ -98,7 +98,9 @@ public class FileSystem {
             }
              */
 
-            //TODO: Seek pntrs :
+            //TODO: Seek pntrs :)
+            int startingPoint = ftEnt.seekPtr / 512;
+
 
             //TODO: Check buffer is large enough
 
@@ -106,14 +108,15 @@ public class FileSystem {
 
             byte[] blockData = new byte[512];
             //Read all the directs
-            for(int i = 0; i < ftEnt.inode.direct.length; i++) {
+            for(int i = startingPoint; i < ftEnt.inode.direct.length; i++) {
                 //Get the data from the block
                 if(ftEnt.inode.direct[i] == -1) {
                     return offset;
                 }
                 SysLib.rawread(ftEnt.inode.direct[i], blockData);
-                for(int j = 0; j < 512; j++) {
+                for(int j = ftEnt.seekPtr % 512; j < 512; j++) {
                     buffer[offset + j] = blockData[j];
+                    ftEnt.seekPtr++;
                 }
                 offset += 512;
             }
@@ -121,7 +124,7 @@ public class FileSystem {
             byte[] indirectData = new byte[512];
             SysLib.rawread(ftEnt.inode.indirect, indirectData);
             int indirectOffset = 0;
-            for(int i = 0; i < 256; i++) {
+            for(int i = startingPoint - ftEnt.inode.direct.length; i < 256; i++) {  //Each block has 512 bytes, each index is 2 bytes
                 //Get the data from the block
                 short nextBlock = SysLib.bytes2short(indirectData, indirectOffset);
                 indirectOffset += 2;
@@ -129,8 +132,9 @@ public class FileSystem {
                     return offset;
                 }
                 SysLib.rawread(nextBlock, blockData);
-                for(int j = 0; j < 512; j++) {
+                for(int j = ftEnt.seekPtr % 512; j < 512; j++) {
                     buffer[offset + j] = blockData[j];
+                    ftEnt.seekPtr++;
                 }
                 offset += 512;
             }

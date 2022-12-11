@@ -245,7 +245,7 @@ public class FileSystem {
 
         //make all elements in array null -  will be used to "dealocate" blocks
         for(byte b : nullArray){
-            b = null;
+            b = 0;
         }
 
         //set seek to the beginning of the file

@@ -159,9 +159,17 @@ public class FileSystem {
         synchronized ( ftEnt ) {
             int offset   = 0;              // buffer offset
             int left     = buffer.length;  // the remaining data of this buffer
-    
 
         }
+
+        //find end of file
+        int cur_pos = ftEnt.seekPtr;//save current position
+        seek(ftEnt,0, SEEK_END);
+        if(ftEnt.seekPtr == -1){
+            SysLib.cerr("ERROR 1 IN WRITE IN FileSystem, call the police");
+        }
+
+        //write from end of file
     }
 
     //TODO: deallocAllBlocks
@@ -206,7 +214,7 @@ public class FileSystem {
             }
 
             if(ftEnt.seekPtr > ftEnt.inode.length || ftEnt.seekPtr < 0){
-                SysLib.cerr("ERROR IN SEEK IN FileSystem: SEEK POINTER OUT OF BOUNDS, SEEK POINTER RESET");
+                SysLib.cerr("RAW READ FAILED IN INDIRECT READ() IN FILE SYSTEM (2)");
                 ftEnt.seekPtr = save_pos;
                 return -1;
             }

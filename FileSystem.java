@@ -71,8 +71,7 @@ public class FileSystem {
         }
         return filetable.ffree( ftEnt );
     }
-	
-	
+
     //TODO: Should be done
     int fsize( FileTableEntry ftEnt ) {
         return ftEnt.inode.length;
@@ -163,13 +162,79 @@ public class FileSystem {
         }
 
         //find end of file
-        int cur_pos = ftEnt.seekPtr;//save current position
-        seek(ftEnt,0, SEEK_END);
-        if(ftEnt.seekPtr == -1){
-            SysLib.cerr("ERROR 1 IN WRITE IN FileSystem, call the police");
+        //int cur_pos = ftEnt.seekPtr;//save current position
+        //seek(ftEnt,0, SEEK_END);
+        //if(ftEnt.seekPtr == -1){
+        //    SysLib.cerr("ERROR 1 IN WRITE IN FileSystem, call the police");
+        //}
+
+        //Make sure we're starting past the end of the data
+        //ftEnt.seekPtr++;
+
+        //write from seekPtr
+
+        //Starting point is the block seekptr points to at start
+        int startingBlock = ftEnt.seekPtr / 512;
+        int endPoint = ftEnt.seekPtr + buffer.length;
+
+        //Where we're at in the input buffer
+        int offset = 0;
+
+        byte[] blockBuffer = new byte[512];
+
+        //We might start partway through the first block, so we need to make sure we don't overwrite anything
+        SysLib.rawread(startingBlock, blockBuffer);
+
+        //Write to the directs first
+        while((ftEnt.seekPtr <= endPoint) && ((ftEnt.seekPtr / 512) < ftEnt.inode.direct.length)){
+            blockBuffer[ftEnt.seekPtr % 512] = buffer[offset];
+            offset++;
+            ftEnt.seekPtr++;
+            //If we reach the end of a block, write the buffer to the block
+            if(ftEnt.seekPtr % 512 == 0) {
+                //write to disk
+                if(SysLib.rawwrite(ftEnt.seekPtr / 512 - 1, blockBuffer) == -1) {
+                    SysLib.cerr("ERROR ON RAWWRITE IN WRITE() IN FILESYSTEM (1)");
+                    return -1;
+                }
+                //read the next block from disk to ensure we don't overwrite anything if we stop partway through
+                if(SysLib.rawread(ftEnt.seekPtr / 512, blockBuffer) == -1) {
+                    SysLib.cerr("ERROR ON RAWREAD IN WRITE() IN FILESYSTEM (1)");
+                    return -1;
+                }
+            }
+        }
+        //Write to the indirects next
+        //max 256 entries in the indirects
+        byte[] indirects = new byte[512];
+        int indirectOffset = ftEnt.seekPtr / 512 - ftEnt.inode.direct.length;
+        SysLib.rawread(ftEnt.inode.indirect, indirects);
+        //Go until we run out of data to write, or until we run out of indirects
+        while((ftEnt.seekPtr <= endPoint) && (((ftEnt.seekPtr / 512) - ftEnt.inode.direct.length ) < 256)){
+            blockBuffer[ftEnt.seekPtr % 512] = buffer[offset];
+            offset++;
+            ftEnt.seekPtr++;
+            //If we reach the end of a block, write the buffer to the block
+            if(ftEnt.seekPtr % 512 == 0) {
+                indirectOffset += 2;
+                //write to disk
+                short block = SysLib.bytes2short(indirects, indirectOffset - 2);
+                if(SysLib.rawwrite(block, blockBuffer) == -1) {
+                    SysLib.cerr("ERROR ON RAWWRITE IN WRITE() IN FILESYSTEM (2)");
+                    return -1;
+                }
+                block = SysLib.bytes2short(indirects, indirectOffset);
+                //read the next block from disk to ensure we don't overwrite anything if we stop partway through
+                if(SysLib.rawread(block, blockBuffer) == -1) {
+                    SysLib.cerr("ERROR ON RAWREAD IN WRITE() IN FILESYSTEM (2)");
+                    return -1;
+                }
+            }
         }
 
-        //write from end of file
+        //Update the file size
+        ftEnt.inode.length = ftEnt.inode.length + offset;
+        return offset;
     }
 
     //Set ftEnt's blocks to null

@@ -95,26 +95,25 @@ public class FileSystem {
             for(int i = 0; i < ftEnt.inode.direct.length && i < left / 2; i++) {
                 SysLib.short2bytes(ftEnt.inode.direct[i], buffer, offset);
                 offset += 2;
-            }
+            } OLD CODE
              */
 
-            //TODO: Seek pntrs :)
+            //use seekpntr to get location to start reading from
             int startingPoint = ftEnt.seekPtr / 512;
 
-
-            //TODO: Check buffer is large enough
-
-            //TODO: Check rawread() returns
-
             byte[] blockData = new byte[512];
-            //Read all the directs
+            //Read all the directs & get data from their blocks into buffer
             for(int i = startingPoint; i < ftEnt.inode.direct.length; i++) {
-                //Get the data from the block
-                if(ftEnt.inode.direct[i] == -1) {
+                if(ftEnt.inode.direct[i] == -1) {//we have hit end of file
                     return offset;
                 }
-                SysLib.rawread(ftEnt.inode.direct[i], blockData);
-                for(int j = ftEnt.seekPtr % 512; j < 512; j++) {
+                //read that block from the disk
+                if(SysLib.rawread(ftEnt.inode.direct[i], blockData) == -1){
+                    SysLib.cerr("RAW READ FAILED IN DIRECT READ() IN FILE SYSTEM");
+                    return -1;
+                }
+                for(int j = ftEnt.seekPtr % 512; (j < 512) && ((j+offset) < buffer.length); j++) {
+                    //add the block data to the buffer
                     buffer[offset + j] = blockData[j];
                     ftEnt.seekPtr++;
                 }
@@ -122,17 +121,26 @@ public class FileSystem {
             }
             //Read the indirect
             byte[] indirectData = new byte[512];
-            SysLib.rawread(ftEnt.inode.indirect, indirectData);
+
+            //read indirect data block
+            if(SysLib.rawread(ftEnt.inode.indirect, indirectData) == -1){
+                SysLib.cerr("RAW READ FAILED IN INDIRECT READ() IN FILE SYSTEM (1)");
+                return -1;
+            }
             int indirectOffset = 0;
-            for(int i = startingPoint - ftEnt.inode.direct.length; i < 256; i++) {  //Each block has 512 bytes, each index is 2 bytes
+            //start looping through indirect block by starting relative to where direct ended
+            for(int i = startingPoint - ftEnt.inode.direct.length; i < 256; i++) {  //Stops @ 256: Each block has 512 bytes, each index is 2 bytes
                 //Get the data from the block
                 short nextBlock = SysLib.bytes2short(indirectData, indirectOffset);
                 indirectOffset += 2;
-                if(nextBlock == -1) {
+                if(nextBlock == -1) {//End of File
                     return offset;
                 }
-                SysLib.rawread(nextBlock, blockData);
-                for(int j = ftEnt.seekPtr % 512; j < 512; j++) {
+                if(SysLib.rawread(nextBlock, blockData) == -1){//read block from disk
+                    SysLib.cerr("RAW READ FAILED IN INDIRECT READ() IN FILE SYSTEM (2)");
+                    return -1;
+                }
+                for(int j = ftEnt.seekPtr % 512; (j < 512) && ((j + offset) < buffer.length); j++) {//adding data from block to the buffer
                     buffer[offset + j] = blockData[j];
                     ftEnt.seekPtr++;
                 }

@@ -186,6 +186,7 @@ public class FileSystem {
     //TODO: seek()
     int seek( FileTableEntry ftEnt, int offset, int whence ) {
         synchronized ( ftEnt ) {
+            int save_pos = ftEnt.seekPtr; //save seek pointer in case of offset error
             /*
             System.out.println( "seek: offset=" + offset +
                     " fsize=" + fsize( ftEnt ) +
@@ -203,6 +204,13 @@ public class FileSystem {
             } else {
                 SysLib.cerr("INVALID WHENCE IN seek(): " + whence);
             }
+
+            if(ftEnt.seekPtr > ftEnt.inode.length || ftEnt.seekPtr < 0){
+                SysLib.cerr("ERROR IN SEEK IN FileSystem: SEEK POINTER OUT OF BOUNDS, SEEK POINTER RESET");
+                ftEnt.seekPtr = save_pos;
+                return -1;
+            }
+            return ftEnt.seekPtr;
 		}
 
     }

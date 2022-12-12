@@ -1,5 +1,13 @@
 import java.util.Vector;
+/**
+ Worked on by: Zach
+ Purpose: The file table is shared by all user threads across the OS. Each entry in the file table is held in the
+ vector "table". This is a single level file system so the table that exists in the root directory is the only file
+ table in the system. Each thread wishing to open a file will have its own entry in the file table.The index of the
+ table will be used as the FD in methods that call for a FD, or a unique per-process ID number.
 
+ Satus: complete but not tested
+ */
 public class FileTable {
 // File Structure Table
 
@@ -11,7 +19,7 @@ public class FileTable {
         dir = directory;                      // instantiate the root directory
     }
 
-    //TODO: you implement
+    //Zach implemented
     public synchronized FileTableEntry falloc(String fname, String mode) {
         // allocate/retrieve and register the corresponding inode using dir
         short iNodeNumber = dir.namei(fname);

@@ -1,3 +1,10 @@
+/**
+ Worked on by: Renee & Zach
+ Purpose: the file system orchastrates the relationship between the directory, filetable, and superblock. The file
+ system intializes these three objects and provides the enviorment for them to ineract with eachother
+
+ Satus: complete but not tested
+ */
 public class FileSystem {
     private SuperBlock superblock;
     private Directory directory;

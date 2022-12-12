@@ -1,4 +1,10 @@
+/**
+ Worked on by: Zach
+ Purpose: Each file table entry contains a seek pointer and inode number of the file it refrences. The file table
+ entries are kept in the FileTable.table vector. Each user thread will have an file table entry.
 
+ Satus: complete but not tested
+ */
 public class FileTableEntry {
 	public int seekPtr;        //    a file seek pointer
     public final Inode inode;  //    a reference to an inode

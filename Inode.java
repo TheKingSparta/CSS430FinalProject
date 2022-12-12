@@ -1,6 +1,7 @@
 /**
 Worked on by: Renee
-	Purpose: Each inode represents one file, creates each inode and reads/writes it to the disk
+	Purpose: Each inode represents one file, creates each inode and reads/writes it to the disk. The inodes are kept as
+ refrences in the FileTableEntry.
 
 	Satus: complete but not tested
  */

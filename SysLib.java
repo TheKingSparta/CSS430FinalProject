@@ -1,6 +1,7 @@
 import java.util.*;
 
 public class SysLib {
+    //FileSystem fileSystem = new FileSystem();
     public static int exec( String args[] ) {
         return Kernel.interrupt( Kernel.INTERRUPT_SOFTWARE,
 				 Kernel.EXEC, 0, args );
@@ -114,5 +115,39 @@ public class SysLib {
 	int n = ((b[offset] & 0xff) << 24) + ((b[offset+1] & 0xff) << 16) +
 	        ((b[offset+2] & 0xff) << 8) + (b[offset+3] & 0xff);
 	return n;
+    }
+
+    //TODO: Added stuff
+
+    public static int format(int files) {
+        return Kernel.interrupt( Kernel.INTERRUPT_SOFTWARE,
+                Kernel.FORMAT, files, null );
+    }
+
+    public static int open(String fileName, String mode) {
+        return Kernel.interrupt( Kernel.INTERRUPT_SOFTWARE,
+                Kernel.OPEN, fileName, new String[] args = mode );
+    }
+
+    public static int read(int fd, byte[] buffer) {
+
+    }
+    public static int write(int fd, byte buffer) {
+
+    }
+    public static int seek(int fd, int offset, int whence) {
+
+    }
+
+    public static int close(int fd) {
+
+    }
+
+    public static int delete(String fileName) {
+
+    }
+
+    public static int fsize(int fd) {
+
     }
 }

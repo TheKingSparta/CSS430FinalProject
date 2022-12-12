@@ -58,6 +58,8 @@ private static Scheduler scheduler;
 private static Disk disk;
 private static Cache cache;
 
+private static FileSystem fileSystem;
+
 // Synchronized Queues
 private static SyncQueue waitQueue;  // for threads to wait for their child
 private static SyncQueue ioQueue;    // I/O queue
@@ -83,6 +85,8 @@ case INTERRUPT_SOFTWARE: // System calls
     // instantiate and start a disk
     disk = new Disk( 1000 );
     disk.start( );
+
+    fileSystem = new FileSystem(1000);
 
     // instantiate a cache memory
     cache = new Cache( disk.blockSize, 10 );
@@ -199,6 +203,7 @@ case INTERRUPT_SOFTWARE: // System calls
     case CFLUSH:  // to be implemented in assignment 4
     cache.flush( );
     return OK;
+    //TODO: fileSystem stuff
     case OPEN:    // to be implemented in project
     return OK;
     case CLOSE:   // to be implemented in project

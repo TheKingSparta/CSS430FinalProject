@@ -35,6 +35,11 @@ public class FileSystem {
         superblock.sync( );
     }
 
+    //TODO: Test
+    //Should only be used by Kernel
+    public FileTableEntry getEntryFromFD(int fd) {
+        return filetable.getFileTableEntry(fd);
+    }
 
     //TODO: Should be done
     boolean format( int files ) {

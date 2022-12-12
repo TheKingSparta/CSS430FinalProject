@@ -53,7 +53,7 @@ public final static int STDERR = 2;
 public final static int OK = 0;
 public final static int ERROR = -1;
 
-// System thread references
+    // System thread references
 private static Scheduler scheduler;
 private static Disk disk;
 private static Cache cache;
@@ -153,6 +153,7 @@ case INTERRUPT_SOFTWARE: // System calls
     // and then went back to sleep
     
     return OK;
+    //TODO: Make work =)
     case READ:
     switch ( param ) {
     case STDIN:
@@ -178,21 +179,23 @@ case INTERRUPT_SOFTWARE: // System calls
             System.out.println("threadOS: caused read errors");
         return ERROR;
     }
-    // return FileSystem.read( param, byte args[] );
-    return ERROR;
+    return fileSystem.read( fileSystem.getEntryFromFD(param), (byte[]) args);
+    //return ERROR;
+    //TODO: Review
     case WRITE:
     switch ( param ) {
     case STDIN:
-            System.out.println("threadOS: cannot write to System.in");
+        System.out.println("threadOS: cannot write to System.in");
         return ERROR;
     case STDOUT:
         System.out.print( (String)args );
-        break;
+        return OK;
     case STDERR:
         System.err.print( (String)args );
-        break;
+        return OK;
     }
-    return OK;
+    return fileSystem.write(fileSystem.getEntryFromFD(param), (byte[]) args);
+    //return OK;
     case CREAD:   // to be implemented in assignment 4
     return cache.read( param, ( byte[] )args ) ? OK : ERROR;
     case CWRITE:  // to be implemented in assignment 4
@@ -203,19 +206,28 @@ case INTERRUPT_SOFTWARE: // System calls
     case CFLUSH:  // to be implemented in assignment 4
     cache.flush( );
     return OK;
-    //TODO: fileSystem stuff
+    //*********************TODO: fileSystem stuff*****************************
+
     case OPEN:    // to be implemented in project
-    return OK;
+        String[] stringArgs = (String[]) args;
+        fileSystem.open(stringArgs[0], stringArgs[1]);
+        return OK;
     case CLOSE:   // to be implemented in project
-    return OK;
+        fileSystem.close(fileSystem.getEntryFromFD(param));
+        return OK;
     case SIZE:    // to be implemented in project
-    return OK;
+        fileSystem.fsize(fileSystem.getEntryFromFD(param));
+        return OK;
     case SEEK:    // to be implemented in project
-    return OK;
+        int[] intArgs = (int[]) args;
+        fileSystem.seek(fileSystem.getEntryFromFD(param), intArgs[0], intArgs[1]);
+        return OK;
     case FORMAT:  // to be implemented in project
-    return OK;
+        fileSystem.format(param);
+        return OK;
     case DELETE:  // to be implemented in project
-    return OK;
+        fileSystem.delete((String) args);
+        return OK;
     }
     return ERROR;
 case INTERRUPT_DISK: // Disk interrupts

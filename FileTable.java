@@ -73,5 +73,10 @@ public class FileTable {
 
     public synchronized boolean fempty() {
         return table.isEmpty();             // return if table is empty
-    }                                        // called before a format
+    }// called before a format
+
+    //Should only be used by Kernel via FileSystem
+    public FileTableEntry getFileTableEntry(int i) {
+        return table.get(i);
+    }
 }

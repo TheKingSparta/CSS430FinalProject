@@ -126,28 +126,37 @@ public class SysLib {
 
     public static int open(String fileName, String mode) {
         return Kernel.interrupt( Kernel.INTERRUPT_SOFTWARE,
-                Kernel.OPEN, fileName, new String[] args = mode );
+                Kernel.OPEN, 0, new String[] {fileName, mode} );
     }
 
+    //TODO: Kernel
     public static int read(int fd, byte[] buffer) {
-
+        return Kernel.interrupt( Kernel.INTERRUPT_SOFTWARE,
+                Kernel.READ, fd, buffer );
     }
-    public static int write(int fd, byte buffer) {
 
+    //TODO: Kernel
+    public static int write(int fd, byte[] buffer) {
+        return Kernel.interrupt( Kernel.INTERRUPT_SOFTWARE,
+                Kernel.WRITE, fd, buffer);
     }
     public static int seek(int fd, int offset, int whence) {
-
+        return Kernel.interrupt( Kernel.INTERRUPT_SOFTWARE,
+                Kernel.SEEK, fd, new int[] {offset, whence} );
     }
 
     public static int close(int fd) {
-
+        return Kernel.interrupt( Kernel.INTERRUPT_SOFTWARE,
+                Kernel.CLOSE, fd, null );
     }
 
     public static int delete(String fileName) {
-
+        return Kernel.interrupt( Kernel.INTERRUPT_SOFTWARE,
+                Kernel.DELETE, 0, fileName );
     }
 
     public static int fsize(int fd) {
-
+        return Kernel.interrupt( Kernel.INTERRUPT_SOFTWARE,
+                Kernel.SIZE, fd, null );
     }
 }

@@ -69,7 +69,7 @@ public class FileTable {
             }
             e.inode.toDisk(e.iNumber);     // reflect this inode to disk
             //TODO: Added to free iNumber for later reuse
-            dir.ifree(e.iNumber);
+            //dir.ifree(e.iNumber);
             e = null;                        // this file table entry is erased.
             notify();
             return true;

@@ -41,6 +41,8 @@ public class SuperBlock {
 		} else {
 			totalBlocks = diskSize;
 			format(defaultInodeBlocks);
+			//TODO: Maybe remove later
+			SysLib.cerr( "Superblock synchronized\n" );
 		}
 
 		//Set each block at and after freeList to point to the next block
@@ -71,7 +73,8 @@ public class SuperBlock {
 		}
 		*/
 		SysLib.rawwrite( 0, superBlock );
-		SysLib.cerr( "Superblock synchronized\n" );
+		//TODO: Turn back on
+		//SysLib.cerr( "Superblock synchronized\n" );
     }
 
     void format( ) {
@@ -127,7 +130,7 @@ public class SuperBlock {
 		//Read in the next free block from the block that freeList points to and update freeList
 		SysLib.rawread(freeBlock, buffer);
 		freeList = SysLib.bytes2int(buffer, 0);
-		synch();
+		sync();
 		return freeBlock;
 	}
 	
@@ -167,7 +170,7 @@ public class SuperBlock {
 		//Set oldBlockNumber to 0
 		SysLib.int2bytes(0, buffer, 0);
 		SysLib.rawwrite(oldBlockNumber, buffer);
-		synch();
+		sync();
 		return true;
 	}
 

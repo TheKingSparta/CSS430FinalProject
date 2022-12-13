@@ -30,7 +30,7 @@ public class FileSystem {
     }
 
     void sync( ) {
-        // directory synchronizatioin
+        // directory synchronization
         FileTableEntry dirEnt = open( "/", "w" );
         byte[] dirData = directory.directory2bytes( );
         write( dirEnt, dirData );
@@ -60,7 +60,7 @@ public class FileSystem {
         superblock.format( files );
     
         // create directory, and register "/" in directory entry 0
-        directory = new Directory( superblock.inodeBlocks );
+        directory = new Directory( superblock.inodeBlocks * 16);
     
         // file table is created, and store directory in the file table
         filetable = new FileTable( directory );
@@ -93,19 +93,21 @@ public class FileSystem {
         //Set the file size. The only way we know how is to read the file in.
         //Buffer should be large enough to store any file. This uses a ton of RAM though. I'm sorry.
         byte[] buffer = new byte[512 * ftEnt.inode.direct.length + 512 * 256];
-        int oldSeek = ftEnt.seekPtr;
-        ftEnt.seekPtr = 0;
-        ftEnt.inode.length = read(ftEnt, buffer);
-        buffer = null;  //Free the memory, hopefully
-        ftEnt.seekPtr = oldSeek;
+        //Create a temporary copy to allow us to read the data, even if the original entry didn't support reading
+        FileTableEntry temp = new FileTableEntry(ftEnt.inode, ftEnt.iNumber, "r");
+        temp.seekPtr = 0;
+
+        ftEnt.inode.length = read(temp, buffer);
         return ftEnt.inode.length;
     }
 
     //TODO: read()
     int read( FileTableEntry ftEnt, byte[] buffer ) {
         //Check if the mode allows the file to be read, return -1 if not
-        if ( ftEnt.mode == "w" || ftEnt.mode == "a" )
+        if ( ftEnt.mode == "w" || ftEnt.mode == "a" ) {
+            SysLib.cerr("Attempted to read without permission \n");
             return -1;
+        }
 
 
         int offset   = 0;              // buffer offset
@@ -122,11 +124,11 @@ public class FileSystem {
              */
 
             //use seekpntr to get location to start reading from
-            int startingPoint = ftEnt.seekPtr / 512;
+            int startingDirectIndex = ftEnt.seekPtr / 512;
 
             byte[] blockData = new byte[512];
             //Read all the directs & get data from their blocks into buffer
-            for(int i = startingPoint; i < ftEnt.inode.direct.length; i++) {
+            for(int i = startingDirectIndex; i < ftEnt.inode.direct.length; i++) {
                 if(ftEnt.inode.direct[i] <= 0) {//we have hit end of file
                     return offset;
                 }
@@ -156,7 +158,7 @@ public class FileSystem {
             }
             int indirectOffset = 0;
             //start looping through indirect block by starting relative to where direct ended
-            for(int i = startingPoint - ftEnt.inode.direct.length; i < 256 && i >= 0; i++) {  //Stops @ 256: Each block has 512 bytes, each index is 2 bytes
+            for(int i = startingDirectIndex - ftEnt.inode.direct.length; i < 256 && i >= 0; i++) {  //Stops @ 256: Each block has 512 bytes, each index is 2 bytes
                 //Get the data from the block
                 short nextBlock = SysLib.bytes2short(indirectData, indirectOffset);
                 indirectOffset += 2;
@@ -164,7 +166,8 @@ public class FileSystem {
                     return offset;
                 }
                 if(SysLib.rawread(nextBlock, blockData) <= 0){//read block from disk
-                    SysLib.cerr("RAW READ FAILED IN INDIRECT READ() IN FILE SYSTEM (2)");
+                    SysLib.cerr("RAW READ FAILED IN INDIRECT READ() IN FILE SYSTEM (2) \n");
+                    SysLib.cerr("Next block: " + nextBlock + "\n");
                     return -1;
                 }
                 for(int j = ftEnt.seekPtr % 512; (j < 512) && (offset < buffer.length); j++) {//adding data from block to the buffer
@@ -314,7 +317,7 @@ public class FileSystem {
         int indirectOffset = ftEnt.seekPtr / 512 - ftEnt.inode.direct.length;
 
         short block = 0;
-        byte[] bufferForBlockNumber = new byte[512];
+        //byte[] bufferForBlockNumber = new byte[512];
 
         //Go until we run out of data to write, or until we run out of indirects
         while((ftEnt.seekPtr <= endPoint) && (((ftEnt.seekPtr / 512) - ftEnt.inode.direct.length ) < 256) && offset < buffer.length){
@@ -326,8 +329,8 @@ public class FileSystem {
                 indirectOffset += 2;
                 //write to disk
                 block = (short) superblock.getFreeBlock();
-                SysLib.short2bytes(block, bufferForBlockNumber, 2 * currDirectIndex);
-                SysLib.rawwrite(ftEnt.inode.indirect, bufferForBlockNumber);
+                SysLib.short2bytes(block, indirects, 0);    //TODO: Double Check offset
+                SysLib.rawwrite(ftEnt.inode.indirect, indirects);
                 if(SysLib.rawwrite(block, blockBuffer) == -1) {
                     SysLib.cerr("ERROR ON RAWWRITE IN WRITE() IN FILESYSTEM (2)");
                     return -1;
@@ -344,12 +347,10 @@ public class FileSystem {
                 currDirectIndex++;
             }
         }
-        indirectOffset += 2;
         //write anything else to the disk
         block = (short) superblock.getFreeBlock();
-        bufferForBlockNumber = new byte[512];
-        SysLib.short2bytes(block, bufferForBlockNumber, 2 * currDirectIndex);
-        SysLib.rawwrite(ftEnt.inode.indirect, bufferForBlockNumber);
+        SysLib.short2bytes(block, indirects, 2 * currDirectIndex);
+        SysLib.rawwrite(ftEnt.inode.indirect, indirects);
         if(SysLib.rawwrite(block, blockBuffer) == -1) {
             SysLib.cerr("ERROR ON RAWWRITE IN WRITE() IN FILESYSTEM (2)");
             return -1;
@@ -414,14 +415,15 @@ public class FileSystem {
             }
             else if (whence == SEEK_END) {  //From the end
                 //Find the end of the file
-                SysLib.cerr("" + fsize(ftEnt) + "\n");
+                //SysLib.cerr("" + fsize(ftEnt) + "\n");
                 ftEnt.seekPtr = fsize(ftEnt) + offset;
             } else {
                 SysLib.cerr("INVALID WHENCE IN seek(): " + whence);
             }
 
             if(ftEnt.seekPtr > fsize(ftEnt) || ftEnt.seekPtr < 0){
-                SysLib.cerr("RAW READ FAILED IN INDIRECT READ() IN FILE SYSTEM (2)");
+                SysLib.cerr("Incorrect Seek pointer position in seek \n");
+                SysLib.cerr("Offset: " + offset + " Whence: " + whence + " Pos: " + ftEnt.seekPtr + "\n");
                 ftEnt.seekPtr = save_pos;
                 return -1;
             }

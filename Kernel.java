@@ -143,10 +143,14 @@ case INTERRUPT_SOFTWARE: // System calls
     
     return OK;
     case SYNC:     // synchronize disk data to a real file
+        fileSystem.sync();
+        /*
     while ( disk.sync( ) == false )
         ioQueue.enqueueAndSleep( COND_DISK_REQ );
     while ( disk.testAndResetReady( ) == false )
         ioQueue.enqueueAndSleep( COND_DISK_FIN );
+
+         */
 
     // it's possible that a thread waiting to make a request was released by the disk,
     // but then promptly looped back, found the buffer wasn't available for sending (bufferReady == true)

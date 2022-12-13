@@ -26,8 +26,8 @@ public class Inode {
 	count = 0;
 	flag = 1;
 	for ( int i = 0; i < directSize; i++ )
-	    direct[i] = -1;
-	indirect = -1;
+	    direct[i] = 0;
+	indirect = 0;
     }
 
 	// making inode from disk
@@ -43,6 +43,11 @@ public class Inode {
 		offset += 2;
 		flag = SysLib.bytes2short( data, offset );
 		offset += 2;
+
+		for ( int i = 0; i < directSize; i++ )
+			direct[i] = 0;
+		indirect = 0;
+
 		for ( int i = 0; i < directSize; i++ ) {
 			direct[i] = SysLib.bytes2short( data, offset );
 			offset += 2;

@@ -86,14 +86,13 @@ case INTERRUPT_SOFTWARE: // System calls
     disk = new Disk( 1000 );
     disk.start( );
 
-    fileSystem = new FileSystem(1000);
-
     // instantiate a cache memory
     cache = new Cache( disk.blockSize, 10 );
 
     // instantiate synchronized queues
     ioQueue = new SyncQueue( );
     waitQueue = new SyncQueue( scheduler.getMaxThreads( ) );
+    fileSystem = new FileSystem(1000);
     return OK;
     case EXEC:
     return sysExec( ( String[] )args );
@@ -179,8 +178,12 @@ case INTERRUPT_SOFTWARE: // System calls
             System.out.println("threadOS: caused read errors");
         return ERROR;
     }
-    return fileSystem.read( fileSystem.getEntryFromFD(param), (byte[]) args);
-    //return ERROR;
+    if ( ( myTcb = scheduler.getMyTcb( ) ) != null ) {
+        if(myTcb.ftEnt[param] != null) {
+            return fileSystem.read(myTcb.ftEnt[param], (byte[]) args);
+        }
+    }
+    return ERROR;
     //TODO: Review
     case WRITE:
     switch ( param ) {
@@ -194,8 +197,12 @@ case INTERRUPT_SOFTWARE: // System calls
         System.err.print( (String)args );
         return OK;
     }
-    return fileSystem.write(fileSystem.getEntryFromFD(param), (byte[]) args);
-    //return OK;
+    if ( ( myTcb = scheduler.getMyTcb( ) ) != null ) {
+        if(myTcb.ftEnt[param] != null) {
+            return fileSystem.write(myTcb.ftEnt[param], (byte[]) args);
+        }
+    }
+    return ERROR;
     case CREAD:   // to be implemented in assignment 4
     return cache.read( param, ( byte[] )args ) ? OK : ERROR;
     case CWRITE:  // to be implemented in assignment 4
@@ -210,18 +217,39 @@ case INTERRUPT_SOFTWARE: // System calls
 
     case OPEN:    // to be implemented in project
         String[] stringArgs = (String[]) args;
-        fileSystem.open(stringArgs[0], stringArgs[1]);
-        return OK;
+        //Set the fd of the file
+        if ( ( myTcb = scheduler.getMyTcb( ) ) != null ) {
+            for (int i = 3; i < myTcb.ftEnt.length; i++) {
+                if (myTcb.ftEnt[i] == null) {
+                    myTcb.ftEnt[i] = fileSystem.open(stringArgs[0], stringArgs[1]);
+                    return i;
+                }
+            }
+        }
+        return ERROR;
     case CLOSE:   // to be implemented in project
-        fileSystem.close(fileSystem.getEntryFromFD(param));
-        return OK;
+        if ( ( myTcb = scheduler.getMyTcb( ) ) != null ) {
+            if (fileSystem.close(myTcb.ftEnt[param])) {
+                myTcb.ftEnt[param] = null;
+                return OK;
+            } else {
+                myTcb.ftEnt[param] = null;
+                return ERROR;
+            }
+        }
+        return ERROR;
     case SIZE:    // to be implemented in project
-        fileSystem.fsize(fileSystem.getEntryFromFD(param));
-        return OK;
+        if ( ( myTcb = scheduler.getMyTcb( ) ) != null ) {
+            return fileSystem.fsize(myTcb.ftEnt[param]);
+        }
+        return ERROR;
     case SEEK:    // to be implemented in project
         int[] intArgs = (int[]) args;
-        fileSystem.seek(fileSystem.getEntryFromFD(param), intArgs[0], intArgs[1]);
-        return OK;
+        if ( ( myTcb = scheduler.getMyTcb( ) ) != null ) {
+            return fileSystem.seek(myTcb.ftEnt[param], intArgs[0], intArgs[1]);
+
+        }
+        return ERROR;
     case FORMAT:  // to be implemented in project
         fileSystem.format(param);
         return OK;

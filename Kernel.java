@@ -92,7 +92,8 @@ case INTERRUPT_SOFTWARE: // System calls
     // instantiate synchronized queues
     ioQueue = new SyncQueue( );
     waitQueue = new SyncQueue( scheduler.getMaxThreads( ) );
-    fileSystem = new FileSystem(1000);
+    //TODO: Double check?
+    fileSystem = new FileSystem(64);
     return OK;
     case EXEC:
     return sysExec( ( String[] )args );

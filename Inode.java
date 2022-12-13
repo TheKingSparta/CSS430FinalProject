@@ -62,7 +62,9 @@ public class Inode {
 					" flag = " + flag +
 					" direct[0] = " + direct[0] +
 					" indirect = " + indirect );
-		*/
+
+		 */
+
     }
 
  	

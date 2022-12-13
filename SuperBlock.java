@@ -11,6 +11,7 @@ public class SuperBlock {
     private final int defaultInodeBlocks = 64;
     public int totalBlocks; //number of disk blocks
     public int inodeBlocks; //number of inodes
+	public int maxNumInodes; //holds the maximum number of inodes (inodeblocks * 16)
     //public int freeList; //block number of the free-list's head - points to the block number
 	private int freeList;
 	//false: block is not in use
@@ -61,6 +62,7 @@ public class SuperBlock {
 		SysLib.int2bytes( totalBlocks, superBlock, 0 );
 		SysLib.int2bytes( inodeBlocks, superBlock, 4 );
 		SysLib.int2bytes(freeList, superBlock, 8);
+		maxNumInodes = inodeBlocks * 16;
 		/*
 		int offset = 5;
 		for(int i = 0; i < freeList_arr.length && offset < superBlock.length; i++){
@@ -125,6 +127,7 @@ public class SuperBlock {
 		//Read in the next free block from the block that freeList points to and update freeList
 		SysLib.rawread(freeBlock, buffer);
 		freeList = SysLib.bytes2int(buffer, 0);
+		synch();
 		return freeBlock;
 	}
 	
@@ -164,6 +167,7 @@ public class SuperBlock {
 		//Set oldBlockNumber to 0
 		SysLib.int2bytes(0, buffer, 0);
 		SysLib.rawwrite(oldBlockNumber, buffer);
+		synch();
 		return true;
 	}
 

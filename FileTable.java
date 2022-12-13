@@ -40,6 +40,10 @@ public class FileTable {
         // receive a file table entry
         // free the file table entry corresponding to this index
         if (table.removeElement(e) == true) { // find this file table entry
+            if(e == null) {
+                notify();
+                return true;
+            }
             e.inode.count--;       // this entry no longer points to this inode
             switch (e.inode.flag) {
                 case 1:
@@ -67,8 +71,23 @@ public class FileTable {
         return table.isEmpty();             // return if table is empty
     }// called before a format
 
+    //Deletes all files
+    public void freeAll() {
+        int startingLength = table.size();
+        while(!fempty()) {
+            ffree(table.get(0));
+        }
+    }
+
+    /*I am stupid
     //Should only be used by Kernel via FileSystem
     public FileTableEntry getFileTableEntry(int i) {
         return table.get(i);
     }
+
+    public int getFDFromFileTableEntry(FileTableEntry entry) {
+        return table.indexOf(entry);
+    }
+
+     */
 }

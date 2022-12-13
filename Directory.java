@@ -57,7 +57,7 @@ public class Directory {
         // filename is the name of a file to be created.
         // allocates a new inode number for this filename.
         short i;
-        // i = 0 is already used for "/"
+        // i = 0 is reserved
         for (i = 1; i < fsizes.length; i++) {
             if (fsizes[i] == 0) {
                 fsizes[i] = Math.min(filename.length(), maxChars);

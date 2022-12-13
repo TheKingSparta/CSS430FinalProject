@@ -221,23 +221,27 @@ public class FileSystem {
             //Return the blocks that are currently being used by the inode
             //Return the directs first
             for(int i = 0; i < ftEnt.inode.direct.length; i++) {
-                if (ftEnt.inode.direct[i] != -1) {
+                if (ftEnt.inode.direct[i] > 0) {
                     superblock.returnBlock(ftEnt.inode.direct[i]);
+                    ftEnt.inode.direct[i] = 0;
                 }
             }
             currDirectIndex = 0;
-            for(int i = 0; i < 256; i++) {
-
+            /*
+            for(int i = 0; i < ftEnt.inode.direct.length; i++) {
                 if (ftEnt.inode.direct[i] > 0) {
                     superblock.returnBlock(ftEnt.inode.direct[i]);
                 }
             }
+
+             */
             //Return the indirects
             for(int i = 0; i < 256; i++) {
                 //Get the next indirect block and return it
                 short nextBlock = SysLib.bytes2short(indirects, i * 2);
                 if(nextBlock > 0)
                     superblock.returnBlock(nextBlock);
+
             }
             indirectIndex = 0;
             ftEnt.inode.direct[currDirectIndex] = (short) superblock.getFreeBlock();
@@ -288,12 +292,14 @@ public class FileSystem {
             }
         }
         //write what we have to the disk
-        currDirectIndex++;
-        ftEnt.inode.direct[currDirectIndex] = (short) superblock.getFreeBlock();
-        //write to disk
-        if(SysLib.rawwrite(ftEnt.inode.direct[currDirectIndex - 1], blockBuffer) == -1) {
-            SysLib.cerr("ERROR ON RAWWRITE IN WRITE() IN FILESYSTEM (1)");
-            return -1;
+        if(currDirectIndex < ftEnt.inode.direct.length - 1) {
+            currDirectIndex++;
+            ftEnt.inode.direct[currDirectIndex] = (short) superblock.getFreeBlock();
+            //write to disk
+            if (SysLib.rawwrite(ftEnt.inode.direct[currDirectIndex - 1], blockBuffer) == -1) {
+                SysLib.cerr("ERROR ON RAWWRITE IN WRITE() IN FILESYSTEM (1)");
+                return -1;
+            }
         }
 
         //******************Start of indirects*************************//

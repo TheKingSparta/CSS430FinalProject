@@ -1,9 +1,9 @@
 /**
 Worked on by: Renee
 	Purpose: Each inode represents one file, creates each inode and reads/writes it to the disk. The inodes are kept as
- refrences in the FileTableEntry.
+ references in the FileTableEntry.
 
-	Satus: complete but not tested
+	Status: complete but not tested
  */
 public class Inode {
 	public final static int iNodeSize = 32;  // fixed to 32 bytes
@@ -54,16 +54,6 @@ public class Inode {
 		}
 		indirect = SysLib.bytes2short( data, offset );
 		offset += 2;
-
-		/*
-		System.out.println( "Inode[" + iNumber + "]: retrieved " +
-					" length = " + length +
-					" count = " + count +
-					" flag = " + flag +
-					" direct[0] = " + direct[0] +
-					" indirect = " + indirect );
-
-		 */
 
     }
 

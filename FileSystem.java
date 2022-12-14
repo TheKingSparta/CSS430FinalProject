@@ -10,10 +10,7 @@ public class FileSystem {
         superblock = new SuperBlock( diskBlocks );
     
         // create directory, and register "/" in directory entry 0
-        //TODO: Altered to inodeBlocks * 16
         directory = new Directory( superblock.inodeBlocks * 16);
-
-        //SysLib.cerr("Num inodeBlocks: " + superblock.inodeBlocks);
     
         // file table is created, and store directory in the file table
         filetable = new FileTable( directory );
@@ -29,6 +26,7 @@ public class FileSystem {
         close( dirEnt );
     }
 
+    //Syncs to the superblock and directory.
     void sync( ) {
         // directory synchronization
         FileTableEntry dirEnt = open( "/", "w" );
@@ -40,16 +38,8 @@ public class FileSystem {
         superblock.sync( );
     }
 
-    //TODO: Test
-    //Should only be used by Kernel
-    /*
-    public FileTableEntry getEntryFromFD(int fd) {
-        return filetable.getFileTableEntry(fd);
-    }
-
-
-     */
-    //TODO: Should be done
+    //Formats the superblock, directory, and filetable to store a max number of files equal to the input.
+    //Deletes all existing files.
     boolean format( int files ) {
         //Delete all files
         // wait until all filetable entries are destructed
@@ -68,7 +58,7 @@ public class FileSystem {
         return true;
     }
 
-    //TODO: Should be done
+    //Open a file, creating a new one if it doesn't already exist.
     FileTableEntry open( String filename, String mode ) {
         //No need to check if file exists, falloc() does it
         // filetable entry is allocated
@@ -78,6 +68,7 @@ public class FileSystem {
         return newEntry;
     }
 
+    //Close an existing file, returns true if successful
     boolean close( FileTableEntry ftEnt ) {
         // filetable entry is freed
         synchronized ( ftEnt ) {
@@ -89,7 +80,7 @@ public class FileSystem {
         }
     }
 
-    //TODO: Should be done
+    //Returns the filesize of the input FileTableEntry. Also updates the corresponding inode length.
     int fsize( FileTableEntry ftEnt ) {
         //Set the file size. The only way we know how is to read the file in.
         //Buffer should be large enough to store any file. This uses a ton of RAM though. I'm sorry.
@@ -102,7 +93,7 @@ public class FileSystem {
         return ftEnt.inode.length;
     }
 
-    //TODO: read()
+    //Reads the input FileTableEntry, copying the data to the buffer. Returns the number of bytes read.
     int read( FileTableEntry ftEnt, byte[] buffer ) {
         //Check if the mode allows the file to be read, return -1 if not
         if ( ftEnt.mode == "w" || ftEnt.mode == "a" ) {
@@ -112,18 +103,8 @@ public class FileSystem {
 
 
         int offset   = 0;              // buffer offset
-        int left     = buffer.length;  // the remaining data of this buffer
     
         synchronized ( ftEnt ) {
-			// repeat reading until no more data  or reaching EOF
-            //Each direct is a short, a short is 2 bytes
-            /*
-            for(int i = 0; i < ftEnt.inode.direct.length && i < left / 2; i++) {
-                SysLib.short2bytes(ftEnt.inode.direct[i], buffer, offset);
-                offset += 2;
-            } OLD CODE
-             */
-
             //use seekpntr to get location to start reading from
             int startingDirectIndex = ftEnt.seekPtr / 512;
 
@@ -181,8 +162,7 @@ public class FileSystem {
         return offset;
     }
 
-    //TODO: finish write() ?
-    //TODO: Append vs. overwrite
+    //Writes to the input FileTableEntry. Copies the data from buffer. Returns the number of bytes written.
     int write( FileTableEntry ftEnt, byte[] buffer ) {
         // at this point, ftEnt is only the one to modify the inode
         if ( ftEnt.mode == "r" )
@@ -193,20 +173,6 @@ public class FileSystem {
             int left     = buffer.length;  // the remaining data of this buffer
 
         }
-
-        //find end of file
-        //int cur_pos = ftEnt.seekPtr;//save current position
-        //seek(ftEnt,0, SEEK_END);
-        //if(ftEnt.seekPtr == -1){
-        //    SysLib.cerr("ERROR 1 IN WRITE IN FileSystem, call the police");
-        //}
-
-        //Make sure we're starting past the end of the data
-        //ftEnt.seekPtr++;
-
-        //write from seekPtr
-
-        //Starting point is the block seekptr points to at start
 
         int currDirectIndex = ftEnt.inode.direct.length;
         int indirectIndex = 256;
@@ -234,14 +200,6 @@ public class FileSystem {
                 }
             }
             currDirectIndex = 0;
-            /*
-            for(int i = 0; i < ftEnt.inode.direct.length; i++) {
-                if (ftEnt.inode.direct[i] > 0) {
-                    superblock.returnBlock(ftEnt.inode.direct[i]);
-                }
-            }
-
-             */
             //Return the indirects
             for(int i = 0; i < 256; i++) {
                 //Get the next indirect block and return it
@@ -292,13 +250,6 @@ public class FileSystem {
                     currDirectIndex++;
                     ftEnt.inode.direct[currDirectIndex] = (short) superblock.getFreeBlock();
                 }
-                /*
-                //read the next block from disk to ensure we don't overwrite anything if we stop partway through
-                if(SysLib.rawread(ftEnt.seekPtr / 512, blockBuffer) == -1) {
-                    SysLib.cerr("ERROR ON RAWREAD IN WRITE() IN FILESYSTEM (1)");
-                    return -1;
-                }
-                 */
             }
         }
         //write what we have to the disk
@@ -336,15 +287,6 @@ public class FileSystem {
                     SysLib.cerr("ERROR ON RAWWRITE IN WRITE() IN FILESYSTEM (2)");
                     return -1;
                 }
-                /*
-                block = SysLib.bytes2short(indirects, indirectOffset);
-                //read the next block from disk to ensure we don't overwrite anything if we stop partway through
-                if(SysLib.rawread(block, blockBuffer) == -1) {
-                    SysLib.cerr("ERROR ON RAWREAD IN WRITE() IN FILESYSTEM (2)");
-                    return -1;
-                }
-
-                 */
                 currDirectIndex++;
             }
         }
@@ -385,9 +327,7 @@ public class FileSystem {
         return true;
     }
 
-	
-	
-	
+    //Delete the corresponding fileTableEntry and matching data.
     boolean delete( String filename ) {
         FileTableEntry ftEnt = open( filename, "w" );
         short iNumber = ftEnt.iNumber;
@@ -398,16 +338,10 @@ public class FileSystem {
     private final int SEEK_CUR = 1;
     private final int SEEK_END = 2;
 
-    //TODO: seek()
+    //Set the seek pointer of the input FileTableEntry to the correct position, according to offset and whence
     int seek( FileTableEntry ftEnt, int offset, int whence ) {
         synchronized ( ftEnt ) {
             int save_pos = ftEnt.seekPtr; //save seek pointer in case of offset error
-            /*
-            System.out.println( "seek: offset=" + offset +
-                    " fsize=" + fsize( ftEnt ) +
-                    " seekptr=" + ftEnt.seekPtr +
-                    " whence=" + whence );
-            */
             fsize(ftEnt);
             if(whence == SEEK_SET) {    //From the beginning
                 ftEnt.seekPtr = offset;
@@ -416,7 +350,6 @@ public class FileSystem {
             }
             else if (whence == SEEK_END) {  //From the end
                 //Find the end of the file
-                //SysLib.cerr("" + fsize(ftEnt) + "\n");
                 ftEnt.seekPtr = fsize(ftEnt) + offset;
             } else {
                 SysLib.cerr("INVALID WHENCE IN seek(): " + whence);
@@ -432,11 +365,4 @@ public class FileSystem {
 		}
 
     }
-
-    /*
-    public int getFDFromEntry(FileTableEntry entry) {
-        return filetable.getFDFromFileTableEntry(entry);
-    }
-    *
-     */
 }

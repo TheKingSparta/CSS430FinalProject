@@ -74,6 +74,7 @@ public class FileSystem {
         // filetable entry is allocated
         FileTableEntry newEntry = filetable.falloc(filename, mode);
         fsize(newEntry);
+        //seek(newEntry, 0, SEEK_SET);
         return newEntry;
     }
 

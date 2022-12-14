@@ -1,6 +1,10 @@
-//Test
-
-import java.util.*;
+/**
+ * Worked on by: Renee
+ * Purpose: Each inode represents one file, creates each inode and reads/writes it to the disk. The inodes are kept as
+ * references in the FileTableEntry.
+ *
+ * Status: complete but not tested
+ */
 
 public class Directory {
     private static int maxChars = 30; // the max characters of each file name
@@ -19,20 +23,18 @@ public class Directory {
         root.getChars(0, fsizes[0], fnames[0], 0);
     }
 
-    //TODO: you implement
     public void bytes2directory(byte data[]) {
         // assumes data[] contains directory information retrieved from disk
         // initialize the directory fsizes[] and fnames[] with this data[]
         // fsizes and fnames should already have the correct lengths
         int currDataIndex = 0;
         //First fsizes.length bytes: fsizes
-        for(; currDataIndex < fsizes.length; currDataIndex++) {
-            //TODO: Double check with Renee
+        for (; currDataIndex < fsizes.length; currDataIndex++) {
             //There's not any documentation about the "offset" (second) parameter of bytes2int, so this may be wrong
             fsizes[currDataIndex] = SysLib.bytes2int(data, currDataIndex * 4);
         }
         //Next fnames.length bytes: fnames
-        for(; currDataIndex < fnames.length; currDataIndex++) {
+        for (; currDataIndex < fnames.length; currDataIndex++) {
 
         }
     }
@@ -68,14 +70,13 @@ public class Directory {
         return -1;
     }
 
-    //TODO: you implement
     public boolean ifree(short iNumber) {
         // deallocates this inumber (inode number).
         // the corresponding file will be deleted.
         //reset fsizes
         fsizes[iNumber] = 0;
         //Reset fnames
-        for(int i = 0; i < fnames[iNumber].length; i++) {
+        for (int i = 0; i < fnames[iNumber].length; i++) {
             //fnames should probably bet set to something else, but I'm not sure what would be better. ' '?
             fnames[iNumber][i] = 0;
         }

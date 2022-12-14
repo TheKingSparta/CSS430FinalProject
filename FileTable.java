@@ -1,12 +1,13 @@
 import java.util.Vector;
-/**
- Worked on by: Zach
- Purpose: The file table is shared by all user threads across the OS. Each entry in the file table is held in the
- vector "table". This is a single level file system so the table that exists in the root directory is the only file
- table in the system. Each thread wishing to open a file will have its own entry in the file table.The index of the
- table will be used as the FD in methods that call for a FD, or a unique per-process ID number.
 
- Status: complete
+/**
+ * Worked on by: Zach
+ * Purpose: The file table is shared by all user threads across the OS. Each entry in the file table is held in the
+ * vector "table". This is a single level file system so the table that exists in the root directory is the only file
+ * table in the system. Each thread wishing to open a file will have its own entry in the file table.The index of the
+ * table will be used as the FD in methods that call for a FD, or a unique per-process ID number.
+ *
+ * Status: complete
  */
 public class FileTable {
 // File Structure Table
@@ -23,7 +24,7 @@ public class FileTable {
     public synchronized FileTableEntry falloc(String fname, String mode) {
         // allocate/retrieve and register the corresponding inode using dir
         short iNodeNumber = dir.namei(fname);
-        if(iNodeNumber == -1) { //If the file doesn't exist, create it
+        if (iNodeNumber == -1) { //If the file doesn't exist, create it
             iNodeNumber = dir.ialloc(fname);
         }
 
@@ -47,7 +48,7 @@ public class FileTable {
         // receive a file table entry
         // free the file table entry corresponding to this index
         if (table.removeElement(e) == true) { // find this file table entry
-            if(e == null) {
+            if (e == null) {
                 notify();
                 return true;
             }
@@ -81,7 +82,7 @@ public class FileTable {
     //Deletes all files
     public void freeAll() {
         int startingLength = table.size();
-        while(!fempty()) {
+        while (!fempty()) {
             ffree(table.get(0));
         }
     }

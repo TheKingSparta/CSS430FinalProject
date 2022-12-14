@@ -6,7 +6,7 @@ import java.util.Vector;
  table in the system. Each thread wishing to open a file will have its own entry in the file table.The index of the
  table will be used as the FD in methods that call for a FD, or a unique per-process ID number.
 
- Satus: complete but not tested
+ Status: complete
  */
 public class FileTable {
 // File Structure Table
@@ -37,7 +37,6 @@ public class FileTable {
         newEntry.count++;
 
         // immediately write back this inode to the disk
-        //TODO: Is this right?
         newEntry.inode.toDisk(iNodeNumber);
 
         // return a reference to this file (structure) table entry
@@ -68,8 +67,6 @@ public class FileTable {
                     break;
             }
             e.inode.toDisk(e.iNumber);     // reflect this inode to disk
-            //TODO: Added to free iNumber for later reuse
-            //dir.ifree(e.iNumber);
             e = null;                        // this file table entry is erased.
             notify();
             return true;
@@ -88,16 +85,4 @@ public class FileTable {
             ffree(table.get(0));
         }
     }
-
-    /*I am stupid
-    //Should only be used by Kernel via FileSystem
-    public FileTableEntry getFileTableEntry(int i) {
-        return table.get(i);
-    }
-
-    public int getFDFromFileTableEntry(FileTableEntry entry) {
-        return table.indexOf(entry);
-    }
-
-     */
 }

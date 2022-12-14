@@ -1,4 +1,9 @@
-import java.io.File;
+/**
+ Worked on by: Zach and Renee
+ Purpose:
+
+ Status: complete
+ */
 
 public class FileSystem {
     private SuperBlock superblock;

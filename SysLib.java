@@ -1,3 +1,10 @@
+/**
+ Worked on by: Zach
+ Purpose:
+
+ Status: complete
+ */
+
 import java.util.*;
 
 public class SysLib {
@@ -112,12 +119,10 @@ public class SysLib {
     }
 
     public static int bytes2int( byte[] b, int offset ) {
-	int n = ((b[offset] & 0xff) << 24) + ((b[offset+1] & 0xff) << 16) +
-	        ((b[offset+2] & 0xff) << 8) + (b[offset+3] & 0xff);
-	return n;
+        int n = ((b[offset] & 0xff) << 24) + ((b[offset + 1] & 0xff) << 16) +
+                ((b[offset + 2] & 0xff) << 8) + (b[offset + 3] & 0xff);
+        return n;
     }
-
-    //TODO: Added stuff
 
     public static int format(int files) {
         return Kernel.interrupt( Kernel.INTERRUPT_SOFTWARE,
@@ -129,13 +134,11 @@ public class SysLib {
                 Kernel.OPEN, 0, new String[] {fileName, mode} );
     }
 
-    //TODO: Kernel
     public static int read(int fd, byte[] buffer) {
         return Kernel.interrupt( Kernel.INTERRUPT_SOFTWARE,
                 Kernel.READ, fd, buffer );
     }
 
-    //TODO: Kernel
     public static int write(int fd, byte[] buffer) {
         return Kernel.interrupt( Kernel.INTERRUPT_SOFTWARE,
                 Kernel.WRITE, fd, buffer);

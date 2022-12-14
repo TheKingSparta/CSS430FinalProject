@@ -5,7 +5,7 @@
 	"For accessing this block, you should call SysLib.rawread( 0, data ) where data is a 512-byte array."
 	NO USER THREADS CAN ACCESS SUPER BLOCK
 
-	Satus: complete; freelist may cause issues
+	Status: complete; freelist may cause issues
  */
 public class SuperBlock {
     private final int defaultInodeBlocks = 64;
@@ -25,23 +25,12 @@ public class SuperBlock {
 		totalBlocks = SysLib.bytes2int(data, 0);//image this should be like sync function but not sure what all the parameters are for it
 		inodeBlocks = SysLib.bytes2int(data, 4);
 		freeList = SysLib.bytes2int(data, 8);
-		//freeList_arr = new boolean[totalBlocks + 1];
-
-		/*
-		int offset = 5;
-		for(int i = 0; i < 512 && offset < 512; i++){
-			freeList_arr[i] = (data[offset] != 0);
-			//superBlock[offset + 1] = (byte) (block ? 1 : 0);
-			offset++;
-		}
-		*/
 
 		if(totalBlocks == diskSize && inodeBlocks > 0 && freeList < 2) {
 			return;
 		} else {
 			totalBlocks = diskSize;
 			format(defaultInodeBlocks);
-			//TODO: Maybe remove later
 			SysLib.cerr( "Superblock synchronized\n" );
 		}
 
@@ -65,24 +54,16 @@ public class SuperBlock {
 		SysLib.int2bytes( inodeBlocks, superBlock, 4 );
 		SysLib.int2bytes(freeList, superBlock, 8);
 		maxNumInodes = inodeBlocks * 16;
-		/*
-		int offset = 5;
-		for(int i = 0; i < freeList_arr.length && offset < superBlock.length; i++){
-			superBlock[offset] = (byte) (freeList_arr[i] ? 1 : 0);
-			offset++;
-		}
-		*/
 		SysLib.rawwrite( 0, superBlock );
-		//TODO: Turn back on
-		//SysLib.cerr( "Superblock synchronized\n" );
     }
 
+	//Formats the superblock
     void format( ) {
 		// default format with 64 inodes
 		format( defaultInodeBlocks );
     }
-	
-	//TODO: should blocks 1-3 be set???
+
+	//Formats the superblock
 	 void format( int files ) {
 		//For the default 64:
 		//Block 0: super block
@@ -94,37 +75,13 @@ public class SuperBlock {
 		 inodeBlocks = files / 16; //Number of blocks allocated for inodes
 		 totalBlocks = 1000; //Should always be 1000 :)
 		freeList = inodeBlocks + 1;
-		 /*
-		freeList_arr = new boolean[totalBlocks + 1];//keep track of blocks in use
-		for(int i = 0; i < freeList_arr.length; i++){
-			freeList_arr[i] = false;//set all blocks to not in use
-		}
-		freeList_arr[0] = true;//set super block to be in use
-
-		 //Set the inode blocks to in use
-		 for(int i = 1; i < inodeBlocks + 1; i++) {
-			 freeList_arr[i] = true;
-
-		  */
 		sync(); //write it onto the disk
 		SysLib.cerr("Superblock has been formatted\n");
 	 }
 	
-	//TODO: you implement
+	//Returns the next free block in the list
 	public int getFreeBlock( ) {
 		// get a new free block from the freelist
-		/*
-		for(int i = 1; i < freeList_arr.length; i++){
-			if(freeList_arr[i] == false){
-				return i;
-			}
-		}
-		if(freeList < totalBlocks) {
-			freeList++;
-			return freeList - 1;
-		}
-		return -1; //If there is no free block
-		 */
 		int freeBlock = freeList;
 		byte[] buffer = new byte[512];
 		//Read in the next free block from the block that freeList points to and update freeList
@@ -134,29 +91,13 @@ public class SuperBlock {
 		return freeBlock;
 	}
 	
-	//TODO: you implement
-	//based on how its used what it does? clear this block? add it to free list?
+	//Adds the input block into the freelist
 	public boolean returnBlock( int oldBlockNumber ) {
 		// return this former block
-		/*
-		if(oldBlockNumber != 0){
-			freeList_arr[oldBlockNumber] = false;
-			return true;
-		}
-		//Can only return the last in-use block
-		return false;
-		if(oldBlockNumber != freeList - 1) {
-			return false;
-		} else {
-			freeList--;
-			return true;
-		}
-		*/
+
 		//Find end of list
-		//int endBlockNumber = 0;
 		int currBlockNumber = freeList;
 		byte[] buffer = new byte[512];
-		//TODO: Check rawreads and rawwrites
 		SysLib.rawread(currBlockNumber, buffer);
 		while(SysLib.bytes2int(buffer, 0) > 0) {
 			currBlockNumber = SysLib.bytes2int(buffer, 0);
